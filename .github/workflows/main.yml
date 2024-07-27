@@ -1,4 +1,4 @@
-name: Final Project Deploy to ECR1
+name: Final Project Deploy to ECR
 
 on: 
   push:
@@ -28,7 +28,7 @@ jobs:
         ECR_REPOSITORY: group1-images-repo
         IMAGE_TAG: v1.0
       run: |
-        cd webapp/
+        # cd webapp/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:group1-mysql-image-$IMAGE_TAG -f Dockerfile_mysql .
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:group1-webapp-image-$IMAGE_TAG .
         docker network create group1network
