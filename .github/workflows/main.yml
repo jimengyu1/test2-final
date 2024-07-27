@@ -1,0 +1,47 @@
+name: Final Project Deploy to ECR
+
+on: 
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Push Image to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        AWS_REGION: us-east-1
+
+    - name: Build, test, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: group1-images-repo
+        IMAGE_TAG: v1.0
+      run: |
+        cd webapp/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:group1-mysql-image-$IMAGE_TAG -f Dockerfile_mysql .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:group1-webapp-image-$IMAGE_TAG .
+        docker network create group1network
+        docker run -d --name group1-mysql-container --network group1network -e MYSQL_ROOT_PASSWORD=group1Password $ECR_REGISTRY/$ECR_REPOSITORY:group1-mysql-image-$IMAGE_TAG
+        docker run -d --name group1-webapp-container --network group1network -p 8081:81 \
+          -e DBHOST=group1-mysql-container \
+          -e DBPORT=3306 \
+          -e DBUSER=root \
+          -e DBPWD=group1Password \
+          -e DATABASE=employees \
+          -e GROUP_NAME=Group1 \
+          -e IMAGE_URL=https://imagefinalproject.s3.amazonaws.com/backgroupimage.jpg \
+          $ECR_REGISTRY/$ECR_REPOSITORY:group1-webapp-image-$IMAGE_TAG
+        docker ps
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:group1-mysql-image-$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:group1-webapp-image-$IMAGE_TAG
