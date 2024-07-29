@@ -40,7 +40,7 @@ jobs:
           -e DBPWD=group1Password \
           -e DATABASE=employees \
           -e GROUP_NAME=Group1 \
-          -e IMAGE_URL=https://imagefinalproject.s3.amazonaws.com/backgroupimage.jpg \
+          -e IMAGE_URL=https://group1-s3-finalproject-images.s3.amazonaws.com/backgroupimage.jpg \
           $ECR_REGISTRY/$ECR_REPOSITORY:group1-webapp-image-$IMAGE_TAG
         docker ps
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:group1-mysql-image-$IMAGE_TAG
