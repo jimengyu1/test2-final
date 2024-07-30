@@ -1,4 +1,4 @@
-name: Final Project Deploy to ECR1
+name: Final Project Deploy to ECR
 
 on: 
   push:
